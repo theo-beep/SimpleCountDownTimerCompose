@@ -3,8 +3,7 @@ package com.theolin.simplecountdowntimercompose
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
 class MainViewModel : ViewModel() {
@@ -18,16 +17,41 @@ class MainViewModel : ViewModel() {
             emit(currentValue)
         }
     }
-    init{
+
+    init {
         collectFlow()
     }
 
-    private fun collectFlow(){
+    private fun collectFlow() {
         viewModelScope.launch {
-            countDownFlow.collect { time->
-            println("the current time is $time")
+            countDownFlow
+                .filter { time -> time % 2 == 0 } //filtering the result
+                .map { time -> time * time }
+                .onEach { time -> println(time) }
+                .collect { time ->
+                    println("the current time is $time")
 
+                }
+            //with an accumulator you can use .reduce { accumulator, value ->  }
+            //with starter you can use  .fold(initial value) { accumulator, value ->  }
+
+        }
+    }
+
+
+    private fun combineFlows(){
+        val flow1 = flow {
+            emit(1)
+            delay(500L)
+            emit(2)
+        }
+
+        val
+        viewModelScope.launch {
+            flow1.flatMapConcat {
+                flow
             }
         }
+
     }
 }
